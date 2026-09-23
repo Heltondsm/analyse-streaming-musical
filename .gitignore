@@ -1,0 +1,6 @@
+.ipynb_checkpoints/
+.DS_Store
+__pycache__/
+
+# fichier de classements (1,4 Go), trop lourd pour GitHub
+data/chart_tracks_genre_2017_2020.csv
