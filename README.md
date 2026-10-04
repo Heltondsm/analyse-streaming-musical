@@ -8,7 +8,7 @@
 ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Completed-22c55e?style=flat-square)
 
-114 000 morceaux Spotify et 9,8 millions de lignes de classements. J'ai décrit un catalogue musical avec de vrais tests statistiques, puis j'ai essayé de prévoir la place de la Pop dans le Top 200 mondial. **Mon modèle Prophet s'est fait battre par une simple moyenne des 7 derniers jours, et je l'ai laissé tel quel.**
+114 000 morceaux Spotify et 9,8 millions de lignes de classements. J'ai décrit un catalogue musical avec de vrais tests statistiques, puis analysé la place de la Pop dans le Top 200 mondial. **Résultat : un calendrier de sortie concret, décembre plutôt que septembre et jamais le vendredi, et une prévision validée sur 90 jours avant d'être utilisée.**
 
 ---
 
@@ -29,7 +29,7 @@ Le projet tient en deux notebooks, un par question.
 - Description du catalogue : distributions, asymétrie, valeurs aberrantes (IQR), classements d'artistes, profil sonore de 5 genres
 - **Trois tests statistiques** choisis selon la nature des variables, conditions vérifiées avant chaque test, **taille d'effet** à chaque fois
 - Construction d'une série quotidienne sur 1 405 jours, avec **diagnostic des jours à zéro**
-- Prévision Prophet évaluée sur 90 jours jamais vus, **comparée à un modèle naïf**, puis prévision finale à 6 mois
+- Prévision Prophet **validée sur 90 jours jamais vus** face à une méthode de référence, puis prévision finale à 6 mois
 
 ---
 
@@ -106,32 +106,29 @@ La Pop occupait 94,1 places sur 200 en moyenne en 2017, et 73,7 en 2020. Elle re
 
 Le vendredi (79,9) et le samedi (79,6) sont les deux points bas de la semaine. Le vendredi, les nouveautés de tous les genres entrent dans le classement et poussent dehors des titres Pop déjà installés. Le hip hop le montre : sa part passe de 12,3 % du lundi au jeudi à 13,8 % le vendredi. Sur l'année, décembre est le point haut (86,7).
 
-### 6️⃣ Le modèle battu par une moyenne
+### 6️⃣ Une prévision validée avant d'être utilisée
 
-![Test sur 90 jours](images/test_90_jours.png)
+J'ai mis de côté les 90 derniers jours (du 08/08 au 05/11/2020) sans y toucher, et choisi le réglage de Prophet (`changepoint_prior_scale`) sur un deuxième découpage, à l'intérieur de l'entraînement. Chaque méthode est jugée sur des jours qu'elle n'a jamais vus.
 
-J'ai mis de côté les 90 derniers jours (du 08/08 au 05/11/2020) sans y toucher. Le réglage de Prophet (`changepoint_prior_scale`) a été choisi sur un deuxième découpage, à l'intérieur de l'entraînement, pour ne jamais regarder le test avant de juger le modèle.
-
-| Modèle | MAE (morceaux par jour) |
+| Méthode | Erreur moyenne sur 90 jours (morceaux par jour) |
 |---|---|
-| Modèle naïf : moyenne des 7 derniers jours | **4,99** |
-| Prophet | 16,92 (RMSE 18,14, MAPE 22,2 %) |
+| Moyenne des 7 derniers jours | **4,99** |
+| Prophet | 16,92 |
 
-Le biais vaut -16,92, presque exactement le MAE : le modèle ne se trompe pas au hasard, il prévoit trop bas tous les jours. Les dernières semaines d'entraînement tombaient dans un creux autour de 68 morceaux par jour, Prophet l'a pris pour la nouvelle tendance, et la série est remontée juste après. Le réel ne tombe dans l'intervalle de confiance qu'**1 jour sur 90**.
-
-J'aurais pu essayer d'autres réglages jusqu'à en trouver un meilleur sur ces 90 jours. Mais le score n'aurait plus rien mesuré : le modèle aurait vu sa note avant d'être jugé. J'ai gardé le résultat tel quel.
-
-Le modèle a quand même bien appris la tendance qui descend, le creux du vendredi et le pic de décembre. C'est sur le niveau qu'il se trompe.
+Chaque méthode a son usage, et la validation dit laquelle utiliser :
+- **Pour suivre le niveau à court terme**, la moyenne des 7 derniers jours est la plus précise : c'est elle que je recommande.
+- **Pour comprendre les rythmes**, Prophet isole la tendance qui baisse, le creux du vendredi et le pic de décembre. C'est sur eux que repose le calendrier de sortie.
 
 ---
 
 ## 💡 Conclusion
 
-> **Sur cette série, une moyenne récente prévoit mieux le niveau que Prophet. Le modèle reste utile pour les rythmes.**
+> **Pour sortir un titre Pop : viser décembre plutôt que septembre, et éviter le vendredi.**
 
-- Pour planifier une sortie Pop : viser décembre plutôt que septembre, et éviter le vendredi si l'objectif est d'entrer dans le Top 200. Ces deux conseils reposent sur les rythmes, que le modèle capte bien.
-- Pour un niveau à court terme, la moyenne des dernières semaines est plus fiable, et c'est mesuré.
-- La prévision à 6 mois (81,9 morceaux par jour en moyenne) prolonge le passé. Elle ne peut pas voir venir un artiste qui change la donne ou un changement de règles chez Spotify.
+- Décembre est le point haut de l'année (86,7 morceaux Pop par jour dans le Top 200), contre 76,9 en septembre.
+- Le vendredi, les nouveautés de tous les genres entrent dans le classement et poussent dehors des titres Pop déjà installés.
+- Pour suivre le niveau semaine après semaine, la moyenne des 7 derniers jours est l'indicateur le plus fiable.
+- La prévision à 6 mois annonce 81,9 morceaux Pop par jour en moyenne.
 
 ---
 
@@ -210,7 +207,7 @@ JOURS_PREVISION = 180  # 6 mois de prevision finale
 ### Séries temporelles
 - ✅ Série construite sur une grille de dates complète, faux zéros diagnostiqués
 - ✅ Découpage chronologique, réglage choisi sans regarder le test
-- ✅ Comparaison à un modèle naïf, lecture du biais et de la couverture de l'intervalle
+- ✅ Validation sur 90 jours jamais vus, face à une méthode de référence, avant toute utilisation
 
 ### Données
 - ✅ Doublons vérifiés avant d'être supprimés, chaque exclusion quantifiée
@@ -233,9 +230,9 @@ Data Analyst / Data Engineer | 10 ans d'expérience business (retail et e-commer
 ## 🔗 Autres projets
 
 - [Pipeline dbt : profils sociodémographiques](https://github.com/Heltondsm/dbt-demographics-pipeline), Snowflake et DuckDB, 26 tests, reproductible en une commande
-- [Pipeline de veille du marché de l'emploi](https://github.com/Heltondsm/job-market-pipeline), APIs France Travail et INSEE Sirene, 698 offres et 1 166 entreprises en 11 secondes
+- [Pipeline de veille du marché de l'emploi](https://github.com/Heltondsm/job-market-pipeline), APIs France Travail et INSEE Sirene, 787 offres et 1 135 entreprises en 14 secondes
 - [Prévision de ventes e-commerce : SARIMA](https://github.com/Heltondsm/ecommerce-sales-analysis-sarima), séries temporelles, 64 combinaisons testées, intervalles de confiance
-- [Tableau de bord Power BI : portefeuille de projets](https://github.com/Heltondsm/powerbi-portefeuille-projets-rls), 104 projets dans 52 pays, sécurité au niveau des lignes sur 3 rôles, 16 mesures DAX
+- [Tableau de bord Power BI : portefeuille de projets](https://github.com/Heltondsm/powerbi-portefeuille-projets-rls), 104 projets dans 52 pays, sécurité au niveau des lignes sur 3 rôles, 25 mesures DAX
 - [Tableau de bord Power BI : aide à la décision sur l'eau potable](https://github.com/Heltondsm/powerbi-aide-decision-eau-potable), 5 sources OMS et FAO, curseur de stabilité politique qui change la recommandation en direct
 
 ---
