@@ -219,7 +219,7 @@ JOURS_PREVISION = 180  # 6 mois de prevision finale
 ## 📧 Contact
 
 **Helton Dos Santos Moreira**
-Data Analyst / Data Engineer | 10 ans d'expérience business (retail et e-commerce)
+Data Analyst | 10 ans d'expérience business (retail et e-commerce)
 
 - 📧 Email : heltonmail8@gmail.com
 - 💼 LinkedIn : [in/helton-dsm-data](https://linkedin.com/in/helton-dsm-data)
